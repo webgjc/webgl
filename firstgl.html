@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>test gl</title>
+</head>
+<body onload="main();">
+	<canvas id="canvas" width="400" height="400">not support</canvas>
+	<script src="../lib/webgl-debug.js"></script>
+	<script src="../lib/webgl-utils.js"></script>
+	<script src="../lib/cuon-utils.js"></script>
+	<script type="text/javascript">
+		var v=
+		'attribute vec4 a_Position;'+
+		//'attribute float a_PointSize;'+
+		'void main(){ '+
+		'    gl_Position=a_Position;'+
+		'	 gl_PointSize=10.0; '+
+		'}';
+		var f=
+		'precision mediump float;'+
+		'uniform vec4 u_FragColor;'+
+		'void main(){ '+
+		'    gl_FragColor=u_FragColor;'+
+		'}';
+		function main(){
+			var can=document.getElementById("canvas");
+			var gl=getWebGLContext(can);
+			if(!gl){
+				console.log("error1");
+				return 0;
+			}
+			if(!initShaders(gl,v,f)){
+				console.log("error2");
+				return 0;
+			}
+			var a_Position=gl.getAttribLocation(gl.program,'a_Position');
+			//var a_PointSize=gl.getAttribLocation(gl.program,'a_PointSize');
+			var u_FragColor=gl.getUniformLocation(gl.program,'u_FragColor');
+			if(a_Position<0){
+				console.log("error3");
+				return;
+			}
+			can.onmousedown=function(e){
+				click(e,gl,can,a_Position,u_FragColor);
+			}
+			//gl.vertexAttrib1f(a_PointSize,12.0);
+			//gl.vertexAttrib3f(a_Position,0.0,0.0,0.0);
+			gl.clearColor(0.0,0.0,0.0,1.0);
+			gl.clear(gl.COLOR_BUFFER_BIT);
+			//gl.drawArrays(gl.POINTS,0,1);
+		}
+		var g_points=[];
+		var g_color=[];
+		function click(e,gl,can,a_Position,u_FragColor){
+			var x=e.clientX;
+			var y=e.clientY;
+			var rect=e.target.getBoundingClientRect();
+			x=((x-rect.left)-can.width/2)/(can.width/2);
+			y=(can.height/2-(y-rect.top))/(can.height/2);
+			//console.log(x+","+y);
+			g_points.push([x,y]);
+			//g_color.push([1.0,1.0,1.0,0.0]);
+			//console.log(Math.random());
+			g_color.push([Math.random(),Math.random(),Math.random(),Math.random()]);
+			gl.clear(gl.COLOR_BUFFER_BIT);
+			var len=g_points.length;
+			for(var i=0;i<len;i++){
+				gl.vertexAttrib3f(a_Position,g_points[i][0],g_points[i][1],0.0);
+				gl.uniform4f(u_FragColor,g_color[i][0],g_color[i][1],g_color[i][2],g_color[i][3]);
+				gl.drawArrays(gl.POINTS,0,1);
+			}
+		}
+	</script>
+</body>
+</html>
