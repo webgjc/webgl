@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>secondgl</title>
+</head>
+<body onload="main();">
+	<canvas width="400" height="400" id="canvas"></canvas>
+	<script src="../webgl/lib/webgl-debug.js"></script>
+	<script src="../webgl/lib/webgl-utils.js"></script>
+	<script src="../webgl/lib/cuon-utils.js"></script>
+	<script type="text/javascript">
+	var d=
+	'attribute vec4 a_Position;'+
+	'uniform vec4 u_Translation;'+
+	'uniform float u_CosB,u_SinB;'+
+	'void main(){'+
+	//' 	gl_Position=a_Position+u_Translation;'+
+	' 		gl_Position.x=a_Position.x*u_CosB-a_Position.y*u_SinB;'+
+	' 		gl_Position.y=a_Position.x*u_SinB-a_Position.y*u_CosB;'+
+	' 		gl_Position.z=a_Position.z;'+
+	' 		gl_Position.w=1.0;'+
+	//' 	gl_PointSize=10.0;'+在绘制单个点有用
+	'}';
+	var p=
+	'void main(){'+
+	' 	gl_FragColor=vec4(1.0,0.0,0.0,1.0);'+
+	'}';
+	var tx=0.5;ty=0.5;tz=0.5;
+	var ANGLE=90.0;
+	function main(){
+		var can=document.getElementById("canvas");
+		var gl=getWebGLContext(can);
+		if(!initShaders(gl,d,p)){
+			console.log('1');
+			return;
+		}
+		//var a_Position=gl.getAttribLocation(gl.program,'a_Position');
+		//gl.vertexAttrib3f(a_Position,0.0,0.0,0.0);
+		var n=initVertexBuffers(gl);
+		//var u_Translation=gl.getUniformLocation(gl.program,'u_Translation');
+		var radian=Math.PI*ANGLE/180.0;
+		var cosB=Math.cos(radian);
+		var sinB=Math.sin(radian);
+		var u_CosB=gl.getUniformLocation(gl.program,'u_CosB');
+		var u_SinB=gl.getUniformLocation(gl.program,'u_SinB');
+		//gl.uniform4f(u_Translation,tx,ty,tz,0.0);
+		gl.uniform1f(u_CosB,cosB);
+		gl.uniform1f(u_SinB,sinB);
+		gl.clearColor(0.0,0.0,0.0,1.0);
+		gl.clear(gl.COLOR_BUFFER_BIT);
+		gl.drawArrays(gl.TRIANGLE_FAN,0,n);
+		//gl.POINTS,gl.LINES,gl.LINE_STRIP,gl.LINE_LOOP,gl.TRIANGLES,gl.TRIANGLE_STRIP,gl.TRIANGLE_FAN
+	}
+	function initVertexBuffers(gl){
+		var vertices=new Float32Array([
+			-0.5,0.5,
+			-0.5,-0.5,
+			0.5,0.5,
+			0.5,-0.5
+		]);
+		var n=3;
+		var vertexBuffer=gl.createBuffer();//创建缓冲区对象
+		gl.bindBuffer(gl.ARRAY_BUFFER,vertexBuffer);//将缓冲区对象绑定到目标
+		gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);	//向缓冲区写数据
+		var a_Position=gl.getAttribLocation(gl.program,'a_Position');
+		gl.vertexAttribPointer(a_Position,2,gl.FLOAT,false,0,0);//将缓冲区对象分配到a_Position对象
+		gl.enableVertexAttribArray(a_Position);//连接a_Position变量与分配给他的缓冲区对象
+		return n;
+	}
+	</script>
+</body>
+</html>
