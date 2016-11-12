@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>threegl</title>
+</head>
+<body onload="main();">
+	<canvas width="400" height="400" id="canvas"></canvas>
+	<script src="../webgl/lib/webgl-debug.js"></script>
+	<script src="../webgl/lib/webgl-utils.js"></script>
+	<script src="../webgl/lib/cuon-utils.js"></script>
+	<script src="../webgl/lib/cuon-matrix.js"></script>
+	<script type="text/javascript">
+		var d=
+		'attribute vec4 a_Position;'+
+		'uniform mat4 u_ModelMatrix;'+
+		'void main(){'+
+		' 	gl_Position=u_ModelMatrix * a_Position;'+
+		'}';
+		var p=
+		'void main(){'+
+		' 	gl_FragColor=vec4(1.0,0.0,0.0,1.0);'+
+		'}';
+		var g_last=Date.now();
+		var ANGLE_STEP=45.0;
+		function main(){
+			var can=document.getElementById("canvas");
+			var gl=getWebGLContext(can);
+			initShaders(gl,d,p);
+			gl.clearColor(0,0,0,1);
+			var u_ModelMatrix=gl.getUniformLocation(gl.program,'u_ModelMatrix');
+			var n=initVertexBuffers(gl);
+			var currentAngle=0.0;
+			var ModelMatrix=new Matrix4();
+			/*var ANGLE=60.0;
+			var Tx=0.5;
+			ModelMatrix.setRotate(ANGLE,0,0,1);
+			ModelMatrix.translate(Tx,0,0);
+			gl.uniformMatrix4fv(u_ModelMatrix,false,ModelMatrix.elements);
+			gl.clear(gl.COLOR_BUFFER_BIT);
+			gl.drawArrays(gl.TRIANGLES,0,n);*///库函数旋转加平移
+			var tick=function(){
+				currentAngle=animate(currentAngle);
+				draw(gl,n,currentAngle,ModelMatrix,u_ModelMatrix);
+				requestAnimationFrame(tick);
+			}
+			tick();
+		}
+		function initVertexBuffers(gl){
+			var vertices=new Float32Array([
+			    0,0.3,-0.3,-0.3,0.3,-0.3
+			]);
+			var n=3;
+			var buffer=gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+			gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);
+			var a_Position=gl.getAttribLocation(gl.program,'a_Position');
+			gl.vertexAttribPointer(a_Position,2,gl.FLOAT,false,0,0);
+			gl.enableVertexAttribArray(a_Position);
+			return n;
+		}
+		function animate(angle){//设置最短时间条件改变角度
+			var now=Date.now();
+			var elapsed=now-g_last;
+			g_last=now;
+			var newAngle=angle+(ANGLE_STEP * elapsed)/1000.0;
+			return newAngle%=360;
+		}
+		function draw(gl,n,currentAngle,ModelMatrix,u_ModelMatrix){//擦除加绘画
+			ModelMatrix.setRotate(currentAngle,0,0,1);
+			ModelMatrix.translate(0.35, 0, 0);
+			gl.uniformMatrix4fv(u_ModelMatrix,false,ModelMatrix.elements);
+			gl.clear(gl.COLOR_BUFFER_BIT);
+			gl.drawArrays(gl.TRIANGLES,0,n);
+		}
+	</script>
+</body>
+</html>
