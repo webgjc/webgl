@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>fourgl</title>
+</head>
+<body onload="main();">
+	<canvas width="400" height="400" id="canvas"></canvas>
+	<script src="../webgl/lib/webgl-debug.js"></script>
+	<script src="../webgl/lib/webgl-utils.js"></script>
+	<script src="../webgl/lib/cuon-utils.js"></script>
+	<script src="../webgl/lib/cuon-matrix.js"></script>
+	<script type="text/javascript">
+		var d=
+		'attribute vec4 a_Position;'+
+		'attribute float a_PointSize;'+
+		'void main(){'+
+		' 	gl_Position=a_Position;'+
+		' 	gl_PointSize=a_PointSize;'+
+		'}';
+		var p=
+		'void main(){'+
+		' 	gl_FragColor=vec4(1.0,0.0,0.0,1.0);'+
+		'}';
+		function main(){
+			var can=document.getElementById("canvas");
+			var gl=getWebGLContext(can);
+			initShaders(gl,d,p);
+			var n=initVertexBuffers(gl);
+			gl.clearColor(0.0,0.0,0.0,1.0);
+			gl.clear(gl.COLOR_BUFFER_BIT);
+			gl.drawArrays(gl.POINTS,0,n);
+		}
+		function initVertexBuffers(gl){
+			var vertices=new Float32Array([
+				0.0,0.5,10.0,
+				-0.5,-0.5,20.0,
+				0.5,-0.5,30.0
+			]);
+			var n=3;
+			/*var sizes=new Float32Array([
+				10.0,20.0,30.0
+			]);*/
+			var buffer=gl.createBuffer();
+			var sizeBuffer=gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+			gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);
+			var F=vertices.BYTES_PER_ELEMENT;
+			var a_Position=gl.getAttribLocation(gl.program,'a_Position');
+			gl.vertexAttribPointer(a_Position,2,gl.FLOAT,false,F*3,0);
+			gl.enableVertexAttribArray(a_Position);
+			var a_PointSize=gl.getAttribLocation(gl.program,'a_PointSize');
+			gl.vertexAttribPointer(a_PointSize,1,gl.FLOAT,false,F*3,F*2);
+			gl.enableVertexAttribArray(a_PointSize);
+			/*gl.bindBuffer(gl.ARRAY_BUFFER,sizeBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER,sizes,gl.STATIC_DRAW);
+			var a_PointSize=gl.getAttribLocation(gl.program,'a_PointSize');
+			gl.vertexAttribPointer(a_PointSize,1,gl.FLOAT,false,0,0);
+			gl.enableVertexAttribArray(a_PointSize);*/
+			return n;
+		}
+	</script>
+</body>
+</html>
