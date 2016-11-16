@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>fivegl</title>
+</head>
+<body onload="main()">
+	<canvas width="400" height="400" id="canvas"></canvas>
+	<script src="../webgl/lib/webgl-debug.js"></script>
+	<script src="../webgl/lib/webgl-utils.js"></script>
+	<script src="../webgl/lib/cuon-utils.js"></script>
+	<script src="../webgl/lib/cuon-matrix.js"></script>
+	<script type="text/javascript">
+		var d=
+		'attribute vec4 a_Position;'+
+		'attribute vec2 a_TexCoord;'+
+		'varying vec2 v_TexCoord;'+
+		'void main(){'+
+		'gl_Position=a_Position;'+
+		'v_TexCoord=a_TexCoord;'+
+		'}';
+		var p=
+		'uniform sampler2D u_Sampler;'+
+		'varying lowp vec2 v_TexCoord;'+
+		'void main(){'+
+		'gl_FragColor=texture2D(u_Sampler,v_TexCoord);'+
+		'}';
+		function main(){
+			var can=document.getElementById("canvas");
+			var gl=getWebGLContext(can);
+			if(!initShaders(gl,d,p)){
+				alert('1');
+			};
+			var n=initVertexBuffers(gl);
+			gl.clearColor(0.0,0.0,0.0,1.0);
+			initTextures(gl,n);
+		}
+		function initVertexBuffers(gl){
+			var verticesTexCoords=new Float32Array([
+				-0.5,  0.5,   0.0, 1.0,
+			    -0.5, -0.5,   0.0, 0.0,
+			     0.5,  0.5,   1.0, 1.0,
+			     0.5, -0.5,   1.0, 0.0
+			]);
+			var n=4;
+			var buffer=gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+			gl.bufferData(gl.ARRAY_BUFFER,verticesTexCoords,gl.STATIC_DRAW);
+			var FSIZE=verticesTexCoords.BYTES_PER_ELEMENT;
+			var a_Position=gl.getAttribLocation(gl.program,'a_Position');
+			gl.vertexAttribPointer(a_Position,2,gl.FLOAT,false,FSIZE*4,0)
+			gl.enableVertexAttribArray(a_Position);
+			var a_TexCoord=gl.getAttribLocation(gl.program,'a_TexCoord');
+			gl.vertexAttribPointer(a_TexCoord,2,gl.FLOAT,false,FSIZE*4,FSIZE*2);
+			gl.enableVertexAttribArray(a_TexCoord);
+			return n;
+		}
+		function initTextures(gl,n){
+			var texture=gl.createTexture();
+			var u_Sampler=gl.getUniformLocation(gl.program,'u_Sampler');
+			var image=new Image();
+			image.onload=function(){
+				loadTexture(gl,n,texture,u_Sampler,image);
+			};
+			image.src="../webgl/image/sky.JPG";
+			return true;
+		}
+		function loadTexture(gl,n,texture,u_Sampler,image){
+			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,1);
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_2D,texture);
+			gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+			gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,image);
+			gl.uniform1i(u_Sampler,0);
+			gl.clear(gl.COLOR_BUFFER_BIT);
+			gl.drawArrays(gl.TRIANGLE_STRIP,0,n);
+		}
+	</script>
+</body>
+</html>
