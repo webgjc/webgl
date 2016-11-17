@@ -21,7 +21,7 @@
 		'}';
 		var p=
 		'#ifdef GL_ES\n' +
-  		'precision mediump float;\n' +//这段必须加，precosion用于确认默认精度修饰符 quality可以是highp lowp mediump
+  		'precision mediump float;\n' +//这段必须加，precosion用于确认默认精度修饰符 精度可以是highp lowp mediump
   		'#endif\n' +
 		'uniform sampler2D u_Sampler;'+
 		'uniform sampler2D u_Sampler1;'+
@@ -82,7 +82,7 @@
 		var g1=false;
 		function loadTexture(gl,n,texture,u_Sampler,image,texUnit){
 			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,1);//对纹理进行y轴翻转
-			if(texUnit==0){
+			if(texUnit==0){//激活纹理
 				gl.activeTexture(gl.TEXTURE0);
 				g0=true;
 			}else{
